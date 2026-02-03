@@ -1,0 +1,159 @@
+﻿unit fraHome;
+
+interface
+
+uses
+  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, 
+  FMX.Types, FMX.Graphics, FMX.Controls, FMX.Forms, FMX.Dialogs, FMX.StdCtrls,
+  FMX.Objects, FMX.Controls.Presentation, FMX.Layouts,uUserStore,uPetModel,
+  FMX.ListBox,FireDAC.Comp.Client;
+
+type
+  TFrame5 = class(TFrame)
+    Layout1: TLayout;
+    Layout2: TLayout;
+    Layout3: TLayout;
+    Layout4: TLayout;
+    Label1: TLabel;
+    Label2: TLabel;
+    Rectangle1: TRectangle;
+    imgPet: TImage;
+    lblName: TLabel;
+    Layout5: TLayout;
+    Layout6: TLayout;
+    lblBreed: TLabel;
+    lblAge: TLabel;
+    ListBox1: TListBox;
+    procedure Label4Click(Sender: TObject);
+    procedure LoadPets;
+    procedure FrameEnter(Sender: TObject);
+    procedure LoadPetsFromDB;
+    procedure LoadPetImage;
+  private
+    procedure RefreshPet;
+  public
+
+  end;
+  var
+  CurrentImageRes: string;
+implementation
+
+{$R *.fmx}
+
+procedure TFrame5.RefreshPet;
+var
+Res: TResourceStream;
+begin
+  lblBreed.Text := Pets[ActivePetIndex].Breed;
+  lblName.Text  := Pets[ActivePetIndex].Name;
+  lblAge.Text   := Pets[ActivePetIndex].Age;
+
+  Res := TResourceStream.Create(
+    HInstance,
+    Pets[ActivePetIndex].ImageRes,
+    RT_RCDATA
+  );
+  try
+    imgPet.Bitmap.LoadFromStream(Res);
+  finally
+    Res.Free;
+  end;
+end;
+
+procedure TFrame5.FrameEnter(Sender: TObject);
+begin
+  LoadPets;
+end;
+
+procedure TFrame5.Label4Click(Sender: TObject);
+begin
+  ActivePetIndex := (ActivePetIndex + 1) mod 3;
+  RefreshPet;
+end;
+
+procedure TFrame5.LoadPets;
+var
+  Q: TFDQuery;
+  Item: TListBoxItem;
+begin
+  ListBox1.Clear;
+
+  Q := TFDQuery.Create(nil);
+  try
+    Q.Connection := DB;
+    Q.SQL.Text :=
+      'SELECT id, name, species, breed FROM pets ORDER BY id';
+    Q.Open;
+
+    while not Q.Eof do
+    begin
+      Item := TListBoxItem.Create(ListBox1);
+      Item.Parent := ListBox1;
+      Item.Height := 60;
+
+      Item.Text :=
+        Q.FieldByName('name').AsString + sLineBreak +
+        Q.FieldByName('species').AsString + ' - ' +
+        Q.FieldByName('breed').AsString;
+
+      // sačuvaj ID ljubimca u item-u
+      Item.Tag := Q.FieldByName('id').AsInteger;
+
+      Q.Next;
+    end;
+
+  finally
+    Q.Free;
+  end;
+end;
+procedure TFrame5.LoadPetsFromDB;
+var
+  Q: TFDQuery;
+begin
+  Q := TFDQuery.Create(nil);
+  try
+    Q.Connection := DB;
+    Q.SQL.Text :=
+      'SELECT id, name, species, breed, age, image_res FROM pets ORDER BY id';
+    Q.Open;
+
+    if Q.IsEmpty then
+    begin
+      ShowMessage('Nema ljubimaca u bazi');
+      Exit;
+    end;
+
+    // Prvi ljubimac
+    lblName.Text  := Q.FieldByName('name').AsString;
+    lblBreed.Text := Q.FieldByName('breed').AsString;
+    lblAge.Text   := Q.FieldByName('age').AsString;
+
+    // zapamti resource slike
+    CurrentImageRes := Q.FieldByName('image_res').AsString;
+
+  finally
+    Q.Free;
+  end;
+end;
+
+procedure TFrame5.LoadPetImage;
+var
+  Res: TResourceStream;
+begin
+  if CurrentImageRes = '' then Exit;
+
+  Res := TResourceStream.Create(
+    HInstance,
+    CurrentImageRes,
+    RT_RCDATA
+  );
+  try
+    imgPet.Bitmap.LoadFromStream(Res);
+  finally
+    Res.Free;
+  end;
+  LoadPetImage;
+end;
+
+
+end.
