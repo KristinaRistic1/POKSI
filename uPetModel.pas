@@ -1,7 +1,8 @@
 unit uPetModel;
 
 interface
-
+uses
+  System.SysUtils;
 type
   TPet = record
     Id: Integer;
@@ -9,7 +10,7 @@ type
     Species: string;
     Breed: string;
     Age: string;
-    ImageRes: string;
+    ImageBlob: TBytes;
   end;
 
 implementation

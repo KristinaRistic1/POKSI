@@ -12,18 +12,26 @@ type
     class var FStack: TStack<TFrame>;
     class var FHost: TLayout;
     class var FCurrent: TFrame;
-    class procedure ClearHost;
     class var FCache: TDictionary<TClass, TFrame>;
+    class procedure ClearHost;
   public
     class constructor Create;
     class destructor Destroy;
+
     class procedure GoCached(AFrameClass: TClass; AOwner: TComponent);
     class procedure Init(AHost: TLayout);
     class procedure Go(ANext: TFrame);
     class procedure Back;
+    class procedure GoLogin;
   end;
 
+
 implementation
+uses fraLogin;
+class procedure TNavFrames.GoLogin;
+begin
+  Go(TFrame2.Create(nil));
+end;
 type
   TFrameClass = class of TFrame;
 class constructor TNavFrames.Create;

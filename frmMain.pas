@@ -33,6 +33,8 @@ implementation
 {$R *.fmx}
 
  procedure TForm5.FormCreate(Sender: TObject);
+ var
+  Stream: TResourceStream;
 begin
   TNavFrames.Init(layHost);
   TNavFrames.Go(TFrame1.Create(nil));
@@ -54,41 +56,50 @@ begin
     'species TEXT,' +
     'breed TEXT,' +
     'age TEXT,' +
-    'image_res TEXT' +
+    'image_blob BLOB' +
     ')';
   FDQuery1.ExecSQL;
-  FDQuery1.SQL.Text := 'SELECT COUNT(*) AS cnt FROM pets';
+  FDQuery1.SQL.Text := 'SELECT COUNT(*) FROM pets';
   FDQuery1.Open;
-  if FDQuery1.FieldByName('cnt').AsInteger = 0 then
+  if FDQuery1.Fields[0].AsInteger = 0 then
   begin
-    FDQuery1.Close;
-
     FDQuery1.SQL.Text :=
-      'INSERT INTO pets (name, species, breed, age, image_res) VALUES ' +
-      '(:n, :s, :b, :a, :img)';
-
-    // 1) Milo
-    FDQuery1.ParamByName('n').AsString := 'Milo';
-    FDQuery1.ParamByName('s').AsString := 'pas';
-    FDQuery1.ParamByName('b').AsString := 'Americki pit bul terijer';
-    FDQuery1.ParamByName('a').AsString := '6 meseci';
-    FDQuery1.ParamByName('img').AsString := 'pas';
+      'INSERT INTO pets (name, species, breed, age, image_blob) ' +
+      'VALUES (:name, :species, :breed, :age, :img)';
+    FDQuery1.ParamByName('name').AsString := 'Fido';
+    FDQuery1.ParamByName('species').AsString := 'pas';
+    FDQuery1.ParamByName('breed').AsString := 'Labrador';
+    FDQuery1.ParamByName('age').AsString := '3 godine';
+    Stream := TResourceStream.Create(HInstance, 'PngImage_1', RT_RCDATA);
+    try
+      FDQuery1.ParamByName('img').LoadFromStream(Stream, ftBlob);
+    finally
+      Stream.Free;
+    end;
     FDQuery1.ExecSQL;
 
-    // 2) (primer) Mica - mačka
-    FDQuery1.ParamByName('n').AsString := 'Mica';
-    FDQuery1.ParamByName('s').AsString := 'macka';
-    FDQuery1.ParamByName('b').AsString := 'Britanska kratkodlaka';
-    FDQuery1.ParamByName('a').AsString := '4 meseca';
-    FDQuery1.ParamByName('img').AsString := 'macka';
+    FDQuery1.ParamByName('name').AsString := 'Gus';
+    FDQuery1.ParamByName('species').AsString := 'guster';
+    FDQuery1.ParamByName('breed').AsString := 'Zeleni guster';
+    FDQuery1.ParamByName('age').AsString := '1 godina';
+    Stream := TResourceStream.Create(HInstance, 'PngImage_2', RT_RCDATA);
+    try
+      FDQuery1.ParamByName('img').LoadFromStream(Stream, ftBlob);
+    finally
+      Stream.Free;
+    end;
     FDQuery1.ExecSQL;
 
-    // 3) (primer) Rex - gušter
-    FDQuery1.ParamByName('n').AsString := 'Rex';
-    FDQuery1.ParamByName('s').AsString := 'guster';
-    FDQuery1.ParamByName('b').AsString := 'Bradati guster';
-    FDQuery1.ParamByName('a').AsString := '1 godina';
-    FDQuery1.ParamByName('img').AsString := 'guster';
+    FDQuery1.ParamByName('name').AsString := 'Maca';
+    FDQuery1.ParamByName('species').AsString := 'mačka';
+    FDQuery1.ParamByName('breed').AsString := 'Persijska mačka';
+    FDQuery1.ParamByName('age').AsString := '2 godine';
+    Stream := TResourceStream.Create(HInstance, 'PngImage_3', RT_RCDATA);
+    try
+      FDQuery1.ParamByName('img').LoadFromStream(Stream, ftBlob);
+    finally
+      Stream.Free;
+    end;
     FDQuery1.ExecSQL;
   end
   else
@@ -107,7 +118,7 @@ begin
   try
     Q.Connection := DB;
     Q.SQL.Text :=
-      'SELECT id, name, species, breed, age, image_res FROM pets ORDER BY id';
+      'SELECT id, name, species, breed, age, image_blob FROM pets ORDER BY id';
     Q.Open;
 
     i := 0;
@@ -115,9 +126,10 @@ begin
     begin
       Pets[i].Id := Q.FieldByName('id').AsInteger;
       Pets[i].Name := Q.FieldByName('name').AsString;
+      Pets[i].Species := Q.FieldByName('species').AsString;
       Pets[i].Breed := Q.FieldByName('breed').AsString;
       Pets[i].Age := Q.FieldByName('age').AsString;
-      Pets[i].ImageRes := Q.FieldByName('image_res').AsString;
+      Pets[i].ImageBlob := Q.FieldByName('image_blob').AsBytes;
       Inc(i);
       Q.Next;
     end;

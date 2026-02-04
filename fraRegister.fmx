@@ -1,9 +1,10 @@
 object Frame4: TFrame4
+  Align = Center
   Size.Width = 388.000000000000000000
   Size.Height = 844.000000000000000000
   Size.PlatformDefault = False
   object Layout1: TLayout
-    Align = Client
+    Align = Center
     Size.Width = 388.000000000000000000
     Size.Height = 844.000000000000000000
     Size.PlatformDefault = False

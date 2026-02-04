@@ -82,7 +82,7 @@ begin
 
         SQL.Text :=
           'SELECT id FROM users ' +
-          'WHERE username = :x OR email = :x OR phone = :x';
+          'WHERE lower(username) = lower(:x) OR lower(email) = lower(:x) OR phone = :x';
 
         ParamByName('x').AsString := identifier;
         Open;
@@ -98,7 +98,7 @@ begin
 
         SQL.Text :=
           'UPDATE users SET password = :p ' +
-          'WHERE username = :x OR email = :x OR phone = :x';
+          'WHERE lower(username) = lower(:x) OR lower(email) = lower(:x) OR phone = :x';
 
         ParamByName('p').AsString := edtPassword.Text;
         ParamByName('x').AsString := identifier;

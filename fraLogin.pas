@@ -45,9 +45,9 @@ end;
 
 procedure TFrame2.rectLoginButtonClick(Sender: TObject);
 begin
- if Trim(edtUsername.Text) = '' then
+  if Trim(edtUsername.Text) = '' then
   begin
-    ShowMessage('Unesite korisničko ime');
+    ShowMessage('Unesite korisničko ime ili email');
     Exit;
   end;
 
@@ -65,16 +65,17 @@ begin
 
         SQL.Text :=
           'SELECT * FROM users ' +
-          'WHERE username = :u AND password = :p';
+          'WHERE (lower(username) = lower(:u) OR lower(email) = lower(:u)) ' +
+          'AND password = :p';
 
-        ParamByName('u').AsString := edtUsername.Text;
+        ParamByName('u').AsString := Trim(edtUsername.Text);
         ParamByName('p').AsString := edtPassword.Text;
 
         Open;
 
         if IsEmpty then
         begin
-          ShowMessage('Pogrešno korisničko ime ili lozinka');
+          ShowMessage('Pogrešan username/email ili lozinka');
           Exit;
         end;
 
@@ -83,7 +84,6 @@ begin
       end;
     end;
 
-
     TNavFrames.Go(TFrame5.Create(nil));
 
   except
@@ -91,5 +91,6 @@ begin
       ShowMessage('Greška: ' + E.Message);
   end;
 end;
+
 
 end.

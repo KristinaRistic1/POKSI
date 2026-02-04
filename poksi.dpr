@@ -7,10 +7,7 @@ program poksi;
 uses
   System.StartUpCopy,
   FMX.Forms,
-  frmLogin in 'frmLogin.pas' {Form2},
-  frmForgot in 'frmForgot.pas' {Form3},
   uUserStore in 'uUserStore.pas',
-  uNav in 'uNav.pas',
   frmMain in 'frmMain.pas' {Form5},
   fraWelcome in 'fraWelcome.pas' {Frame1: TFrame},
   fraLogin in 'fraLogin.pas' {Frame2: TFrame},
